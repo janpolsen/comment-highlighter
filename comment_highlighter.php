@@ -18,7 +18,6 @@ History:
 if (!function_exists('checkVersion')) {
   function checkVersion() {
     $latest  = "http://".strtr(basename($_GET['page'], '.php'), '_', '-').".googlecode.com/svn/trunk/{$_GET['page']}";
-    echo $latest;
     $tmpfile = str_replace(array('<br />','&nbsp;'),
                            array(chr(10).chr(13),' '),
                            curlGet($latest));
