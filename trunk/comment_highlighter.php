@@ -2,7 +2,7 @@
 /*
 Plugin Name: Comment Highlighter
 Plugin URI: http://kamajole.dk/files/?wordpress/plugins/comment_highlighter.php
-Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks.
+Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks
 Version: 0.4
 Author: Jan Olsen
 Author URI: http://kamajole.dk
