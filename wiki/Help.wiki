@@ -1,5 +1,5 @@
 #summary Help for configuring this plugin
-#labels Phase-Deploy
+#labels Featured,Phase-Deploy
 
 = Post ID =
 This is the internal [http://wordpress.org Wordpress] ID of the post
