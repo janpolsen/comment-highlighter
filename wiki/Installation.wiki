@@ -25,4 +25,5 @@ There isn't any difference between installing this plugin for the first time and
     This will make a link in you comment header which links directly to the admin interface of the plugin. The email, name, URL, comment and post ID will be pre-filled this way and you can just tag which options you want to use.
 
     The link will of course only be visible for the admins of the blog and not to normal readers.
+
     http://kamajole.dk/images/20070709_comment_highlight.png
