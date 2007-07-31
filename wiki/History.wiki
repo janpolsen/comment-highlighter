@@ -1,0 +1,11 @@
+#summary History of this plugin
+#labels Featured
+
+= History =
+
+== 2007-07-15 - v0.3 ==
+Fixed a minor issue with the "Add new comment highlight" button only showing up if there are at least one comment highlight. Now it should always be there. Thanks to Johan (http://www.mothugg.se/) for pointing this out :)
+Also fixed the way version checks are done
+
+== 2007-07-16 - v0.4 ==
+Added another criteria so it's possible to style odd and even numbered comments

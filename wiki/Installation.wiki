@@ -1,0 +1,28 @@
+#summary Installation guide
+#labels Featured,Phase-Deploy
+
+= Installation and upgrading =
+
+There isn't any difference between installing this plugin for the first time and upgrading the plugin.
+
+  * Download the latest release [http://code.google.com/p/comment-highlighter/downloads/list here]
+  * Save that file as {{{comment_highlighter.php}}} in your plugin-directory
+  * Activate the plugin called *Comment Highlighter* in your admin section under Plugins
+  * Start adding some "rules"
+  * Add the following line to wherever define the class of your comment:
+{{{
+<?php if(function_exists('CommentHighlight')) CommentHighlight(); ?>
+}}}
+  If you use the "Connection" theme, then this line is located in the comments.php file and can look something like this:
+{{{
+<li class="<?php if(function_exists('CommentHighlight')) CommentHighlight(); ?>" id="comment-<?php comment_ID() ?>">
+}}}
+  * You might also want to add the following line to your comment header:
+{{{
+<?php if(function_exists('CommentHighlight')) CommentHighlight('link'); ?>
+}}}
+
+    This will make a link in you comment header which links directly to the admin interface of the plugin. The email, name, URL, comment and post ID will be pre-filled this way and you can just tag which options you want to use.
+
+    The link will of course only be visible for the admins of the blog and not to normal readers.
+    http://kamajole.dk/images/20070709_comment_highlight.png
