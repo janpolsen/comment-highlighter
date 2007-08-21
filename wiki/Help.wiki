@@ -1,34 +1,33 @@
-#summary Help for configuring this plugin
+#summary Help with configuring this plugin
 #labels Featured,Phase-Deploy
-
-= Post ID =
+=== Post ID ===
 This is the internal [http://wordpress.org Wordpress] ID of the post
 
-= Comment ID =
+=== Comment ID ===
 This is the internal [http://wordpress.org Wordpress] ID of the comment
 
-= Email =
+=== Email ===
 This is the email address of the commenter
 
-= Name =
+=== Name ===
 This is the name of the commenter
 
-= URL =
+=== URL ===
 This is the URL of the commenter
 
-= Pingback =
+=== Pingback ===
 This is a boolean variable indication whether or not a comment is actually a pingback
 
-= Even numbered comments =
+=== Even numbered comments ===
 This is every even numbered comments. The actual comment number on the post isn't needed at all. Everything is handled internally in the plugin.
 
-= Odd numbered comments =
+=== Odd numbered comments ===
 This is every odd numbered comments. The actual comment number on the post isn't needed at all. Everything is handled internally in the plugin.
 
-= Global =
+=== Global ===
 This indicates if the rule should be global or not. If this checkbox is checked, then the post ID and comment ID will be ignored, but all other rules are still used.
 
 This is very usefull, if you i.e. want to target all comments made by a specific person based on that persons email address. Just write the email address and check the boxes at "Email" and "Global" and finally write the class to use.
 
-= Class(es) =
+=== Class(es) ===
 The name of the class that should be added to the comment based on the above selected rules. Separate multiple classes with a space.
