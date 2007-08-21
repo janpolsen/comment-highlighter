@@ -1,8 +1,5 @@
-#summary Installation guide
+#summary Installation and upgrading guide
 #labels Featured,Phase-Deploy
-
-= Installation and upgrading =
-
 There isn't any difference between installing this plugin for the first time and upgrading the plugin.
 
   * Download the latest release [http://code.google.com/p/comment-highlighter/downloads/list here]
