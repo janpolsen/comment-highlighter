@@ -1,14 +1,14 @@
 #summary History of this plugin
 #labels Featured
 === 2007-07-09 - v0.1 ===
-http://comment-highlighter.googlecode.com/svn/wiki/star.png Initial "release"
+http://comment-highlighter.googlecode.com/svn/wiki/images/star.png Initial "release"
 
 === 2007-07-15 - v0.3 ===
-http://comment-highlighter.googlecode.com/svn/wiki/bug.png Fixed a minor issue with the "Add new comment highlight" button only showing up if there are at least one comment highlight. Now it should always be there. Thanks to [http://www.mothugg.se Johan] for pointing this out :)
+http://comment-highlighter.googlecode.com/svn/wiki/images/bug.png Fixed a minor issue with the "Add new comment highlight" button only showing up if there are at least one comment highlight. Now it should always be there. Thanks to [http://www.mothugg.se Johan] for pointing this out :)
 
-http://comment-highlighter.googlecode.com/svn/wiki/bug.png Also fixed the way version checks are done
+http://comment-highlighter.googlecode.com/svn/wiki/images/bug.png Also fixed the way version checks are done
 
 === 2007-07-16 - v0.4 ===
-http://comment-highlighter.googlecode.com/svn/wiki/plugin.png Added another criteria so it's possible to style odd and even numbered comments
+http://comment-highlighter.googlecode.com/svn/wiki/images/plugin.png Added another criteria so it's possible to style odd and even numbered comments
 
 
