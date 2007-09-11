@@ -6,7 +6,7 @@ There isn't any difference between installing this plugin for the first time and
   * Save that file as {{{comment_highlighter.php}}} in your plugin-directory
   * Activate the plugin called *Comment Highlighter* in your admin section under Plugins
   * Start adding some "rules"
-  * Add the following line to wherever define the class of your comment:
+  * Add the following line to wherever you define the class of your comment:
 {{{
 <?php if(function_exists('CommentHighlight')) CommentHighlight(); ?>
 }}}
