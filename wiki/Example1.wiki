@@ -1,5 +1,5 @@
+#summary Highlight comments made with a specific email address
 #labels Phase-Implementation
-##summary Highlight comments made with a specific email address
 
 = Highlight all comments based on the email =
 == Changes to the Comment Highlighter plugin ==
