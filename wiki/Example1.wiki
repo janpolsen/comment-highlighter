@@ -3,7 +3,7 @@
 
 = Highlight all comments based on the email =
 == Changes to the Comment Highlighter plugin ==
-  # Go to Admin -> Options -> Comment Highlighter
+  # Go to *Admin* -> *Options* -> *Comment Highlighter*
   # Click the button ||Add a new comment highlight||
   # Check the checkbox at "email" and write the email address in the text field - i.e. `johndoe@example.org`
   # Make sure the "Global" checkbox is checked
@@ -11,7 +11,7 @@
   # Click the button ||Add this comment highlight||
 
 == Changes to the style sheet ==
-  # Now go to Presentation -> Theme Editor and choose Stylesheet in the right menu
+  # Now go to *Admin* -> *Presentation* -> *Theme Editor* and choose Stylesheet in the right menu
   # Add the following (or the style of your choice) to the style sheet:
 {{{
 .commentlist .admincomment {
