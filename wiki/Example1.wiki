@@ -1,5 +1,5 @@
 #labels Phase-Implementation
-#Example of how to set up comment highlight that styles all comments made with a specific email address
+#Highlight comments made with a specific email address
 
 = Highlight all comments based on the email =
 == Changes to the Comment Highlighter plugin ==
