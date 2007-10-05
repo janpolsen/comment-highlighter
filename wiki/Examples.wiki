@@ -1,5 +1,5 @@
 #summary Examples for comment highlighter
-#labels Phase-Implementation
+#labels Phase-Implementation,Featured
 
 [Example1 Highlight all comments based on the email]
 
