@@ -1,0 +1,24 @@
+#labels Phase-Implementation
+#Example of how to set up comment highlight that styles all comments made with a specific email address
+
+= Highlight all comments based on the email =
+== Changes to the Comment Highlighter plugin ==
+  # Go to Admin -> Options -> Comment Highlighter
+  # Click the button ||Add a new comment highlight||
+  # Check the checkbox at "email" and write the email address in the text field - i.e. `johndoe@example.org`
+  # Make sure the "Global" checkbox is checked
+  # Make sure to write a class name at the "Class(es)" text field - i.e. "`admincomment`"
+  # Click the button ||Add this comment highlight||
+
+== Changes to the style sheet ==
+  # Now go to Presentation -> Theme Editor and choose Stylesheet in the right menu
+  # Add the following (or the style of your choice) to the style sheet:
+{{{
+.commentlist .admincomment {
+  background-color: #eeeeff;
+  border: #ddddee 1px solid;
+}
+}}}
+
+== Result ==
+All comments made by any person who has written `johndoe@example.org` as their email address will now be "highlighted" according to the style above.
