@@ -3,31 +3,10 @@
 Plugin Name: Comment Highlighter
 Plugin URI: http://code.google.com/p/comment-highlighter/
 Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks.
-Version: 0.5
+Version: 0.6
 Author: Jan Olsen
 Author URI: http://kamajole.dk
 */
-if (! function_exists ( 'checkVersion' )) {
-	/**
-	 * Returns the version number of the latest official release
-	 *
-	 * @return version number
-	 */
-	function checkVersion () {
-		$latest = "http://" . strtr ( basename ( $_GET [ 'page' ], '.php' ), '_', '-' ) . ".googlecode.com/svn/trunk/{$_GET['page']}" ;
-		$tmpfile = str_replace ( array ( '<br />' , '&nbsp;' ), array ( chr ( 10 ) . chr ( 13 ) , ' ' ), curlGet ( $latest ) ) ;
-		preg_match_all ( '/Version: (.*)/', $tmpfile, $matches ) ;
-		$latest_version = $matches [ 1 ] [ 0 ] ;
-		$_tmp = file ( dirname ( __FILE__ ) . '/' . $_GET [ 'page' ] ) ;
-		list ( $dummy, $this_version ) = explode ( ' ', $_tmp [ 5 ] ) ;
-		if (trim ( $latest_version ) != trim ( $this_version )) {
-			return "<div style='color: red;'>You are running version {$this_version} - there is a <a href='{$latest}'>newer version {$latest_version} available</a></div>" ;
-		} else {
-			return "<div style='color: green;'>You are running the latest version {$this_version}</div>" ;
-		}
-	}
-}
-
 add_action ( 'admin_menu', 'ch_menu' ) ;
 function ch_menu () {
 	global $ch_options ;
@@ -137,7 +116,6 @@ function ch_manage_options () {
 
 	echo "<div class='wrap'>" ;
 
-	echo "<div style='float: right;'>" . checkVersion () . "</div>" ;
 	echo "<h2>Comment Highlighter Options</h2>" ;
 
 	if (isset ( $_GET [ 'c' ] )) {
@@ -304,23 +282,5 @@ if (! function_exists('fff')) {
     $name = basename($name,'.png');
     return "<img src='http://famfamfam.googlecode.com/svn/wiki/images/{$name}.png' alt='{$name}' style='width: 16px; vertical-align: middle;' />";
   }
-}
-if (! function_exists ( 'curlGet' )) {
-	/**
-	 * Downloads a page with curl using some fixed settings
-	 *
-	 * @param string $URL
-	 * @return string containing the page
-	 */
-	function curlGet ( $URL ) {
-		$ch = curl_init () ;
-		$timeout = 3 ;
-		curl_setopt ( $ch, CURLOPT_URL, $URL ) ;
-		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 ) ;
-		curl_setopt ( $ch, CURLOPT_CONNECTTIMEOUT, $timeout ) ;
-		$tmp = curl_exec ( $ch ) ;
-		curl_close ( $ch ) ;
-		return $tmp ;
-	}
 }
 ?>
