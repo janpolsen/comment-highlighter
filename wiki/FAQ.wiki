@@ -1,6 +1,7 @@
 #summary Frequently Asked Questions
+#labels Featured
 
-=== Could you please explain exactly where the php line should be added ? ===
+=== Could you please explain exactly where the PHP line should be added? ===
 
 Most themes (if not all of them) uses shows each comment as a `<li>...</li>`-tag, so the whole purpose is to add a class to this tag.
 
