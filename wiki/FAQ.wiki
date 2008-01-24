@@ -36,7 +36,7 @@ $oddcomment = 'class="alt" ';
 
 </ol>
 }}}
-In line 1 a vriable called `$oddcomment` is set to `class="alt"` and that value is changed after displaying each comment. The result of this is, that every other comment will have a class name called `alt`, which again can have it's own style.
+In line 1 a variable called `$oddcomment` is set to `class="alt"` and that value is changed after displaying each comment. The result of this is, that every other comment will have a class name called `alt`, which again can have it's own style.
 Anyways, those lines of codes are not necessary when using this plugin, since the plugin will handle those classes itself.
 
 The above default theme for comments can be rewritten to utilize the Comment Highlighter plugin as follows:
