@@ -11,7 +11,11 @@ http://famfamfam.googlecode.com/svn/wiki/images/bug.png Also fixed the way versi
 === 2007-07-16 - v0.4 ===
 http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added another criteria so it's possible to style odd and even numbered comments
 
-=== 2007-10-28 - v0.5 ===
+=== 2007-07-18 - v0.5 ===
+http://famfamfam.googlecode.com/svn/wiki/images/script_code.png Fixed plugin version control to work with Google Code
+
+=== 2007-10-28 - v0.6 ===
 http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Just added some icons so and update isn't really needed
 
- 
+=== 2008-07-03 - v0.7 ===
+http://famfamfam.googlecode.com/svn/wiki/images/bug.png Changed {{{get_bloginfo ( 'url' )}}} to {{{get_bloginfo ( 'wpurl' )}}} as mentioned in [http://code.google.com/p/comment-highlighter/issues/detail?id=3 issue #3]
