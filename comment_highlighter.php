@@ -2,8 +2,8 @@
 /*
 Plugin Name: Comment Highlighter
 Plugin URI: http://code.google.com/p/comment-highlighter/
-Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks.
-Version: 0.7
+Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks. If upgrading from v0.7 or earlier, then you MUST visit the settings page to be sure everything is installed correct.
+Version: 0.8
 Author: Jan Olsen
 Author URI: http://kamajole.dk
 */
@@ -19,7 +19,8 @@ function CommentHighlight ( $link = 'class' ) {
 
     if ($link == 'link') {
         if (current_user_can ( 'manage_options' )) {
-            $_url = get_bloginfo ( 'wpurl' ) . "/wp-admin/options-general.php?page=comment_highlighter.php&amp;c={$comment->comment_ID}" ;
+            $ch_options = get_option( 'jpo_comment_highlighter_options' );
+            $_url = get_bloginfo ( 'wpurl' ) . "/wp-admin/options-general.php?page={$ch_options['install_path']}&amp;c={$comment->comment_ID}" ;
             echo " <a href='{$_url}'>(comment highlight)</a>" ;
         }
     } elseif ($link == 'class') {
@@ -247,6 +248,8 @@ function ch_manage_options () {
         }
         $_url = get_bloginfo ( 'wpurl' ) . "/wp-admin/options-general.php?page={$_GET['page']}&amp;c=new" ;
         echo "<input type='button' style='background-color: #ccffcc;' value=' Add a new comment highlight ' onclick=\"location.href = '{$_url}';\" />" ;
+
+        update_option( 'jpo_comment_highlighter_options' , array('install_path' => $_GET['page']) );
     }
     echo "</div>" ;
 }
