@@ -19,3 +19,6 @@ http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Just added some icons
 
 === 2008-07-03 - v0.7 ===
 http://famfamfam.googlecode.com/svn/wiki/images/bug.png Changed {{{get_bloginfo ( 'url' )}}} to {{{get_bloginfo ( 'wpurl' )}}} as mentioned in [http://code.google.com/p/comment-highlighter/issues/detail?id=3 issue #3]
+
+=== 2008-07-08 - v0.8 ===
+http://famfamfam.googlecode.com/svn/wiki/images/bug.png Fixed the link from a comment back to the settings page according to [http://code.google.com/p/comment-highlighter/issues/detail?id=7 issue #7]
