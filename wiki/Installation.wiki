@@ -24,3 +24,8 @@ There isn't any difference between installing this plugin for the first time and
     The link will of course only be visible for the admins of the blog and not to normal readers.
 
     http://kamajole.dk/images/20070709_comment_highlight.png
+
+  * From v0.10 it is possible to add a prefix and/or postfix which will be added to the class(es) for matching rules. You can assign that prefix/postfix like:
+{{{
+<?php if(function_exists('CommentHighlight')) CommentHighlight('class', array('prefix' => 'pre_', 'postfix' => '_post')); ?>
+}}}
