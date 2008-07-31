@@ -3,34 +3,85 @@
 Plugin Name: Comment Highlighter
 Plugin URI: http://code.google.com/p/comment-highlighter/
 Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks. If upgrading from v0.7 or earlier, then you MUST visit the settings page to be sure everything is installed correct.
-Version: 0.8
+Version: 0.10
 Author: Jan Olsen
 Author URI: http://kamajole.dk
 */
 add_action ( 'admin_menu', 'ch_menu' ) ;
+$ch_options = get_option( 'jpo_comment_highlighter_options' );
+if ( $_GET [ 'debug' ] == $ch_options [ 'debug_key' ] ) {
+    $logfile = dirname(__FILE__).'/'.basename(__FILE__, '.php').'.log';
+    $loglevel = 0;
+
+    /**
+     * helper function to do the actual logging to the default log file IF we are in debug mode
+     *
+     * @param string $str string to log
+     * @param int offset compared to previous offset
+     */
+    function logger( $str, $loglevel_offset = 0 ) {
+        global $logfile, $loglevel;
+        if ( $str ) {
+            list( $usec , $sec ) = explode( " " , microtime() );
+            if ( $loglevel_offset < 0 )
+                $loglevel += $loglevel_offset;
+            file_put_contents( $logfile , sprintf( "%s%03s | %s %s\n" , date( "Y-m-d H:i:s." ) , floor( $usec * 1000 ) , str_repeat( '  ' , $loglevel ) , $str ) , FILE_APPEND );
+            if ( $loglevel_offset > 0 )
+                $loglevel += $loglevel_offset;
+        }
+    }
+    file_put_contents( $logfile , '' );
+} else {
+
+    /**
+     * dummy function for logger() when debug mode is deactivated
+     *
+     * @param string $dummy1 void
+     * @param int $dummy2 void
+     * @return boolean false
+     */
+    function logger( $dummy1 = '', $dummy2 = 0 ) {
+        return false;
+    }
+}
+
+
+logger("plugin start", +1);
+logger("\$ch_options = " . var_export( $ch_options , true ));
+
 function ch_menu () {
-    global $ch_options ;
+    global $ch_options;
     add_options_page ( 'CH', 'Comment Highlighter', 9, __FILE__, 'ch_manage_options' ) ;
 }
 
-function CommentHighlight ( $link = 'class' ) {
-    global $comment, $wpdb ;
+function CommentHighlight ( $link = 'class', $additional_options = array() ) {
+    global $comment, $wpdb, $ch_options ;
+    logger("CommentHighlight ( \$link = '{$link}', \$additional_options ) {", +1);
+    logger("\$additional_options = " . var_export($additional_options, true));
+    logger("\$comment = " . var_export($comment, true));
     $ret = array ( ) ;
 
     if ($link == 'link') {
         if (current_user_can ( 'manage_options' )) {
-            $ch_options = get_option( 'jpo_comment_highlighter_options' );
+            logger("current_user_can manage_options");
+
             $_url = get_bloginfo ( 'wpurl' ) . "/wp-admin/options-general.php?page={$ch_options['install_path']}&amp;c={$comment->comment_ID}" ;
+
+            logger("\$_url = {$_url}");
             echo " <a href='{$_url}'>(comment highlight)</a>" ;
         }
     } elseif ($link == 'class') {
         $evenodd = '$evenodd' . $comment->comment_post_ID ;
         global $$evenodd ;
         $$evenodd ++ ;
-        $_meta = $wpdb->get_results ( "SELECT *
-                                 FROM {$wpdb->postmeta}
-                                 WHERE (meta_key = '_jpo_comment_highlighter' AND post_id = {$comment->comment_post_ID})
-                                 OR meta_key = '_jpo_comment_highlighter_global';", ARRAY_A ) ;
+
+        $_sql = "SELECT *
+                 FROM {$wpdb->postmeta}
+                 WHERE (meta_key = '_jpo_comment_highlighter' AND post_id = {$comment->comment_post_ID})
+                 OR meta_key = '_jpo_comment_highlighter_global';";
+        logger("\$_sql = {$_sql}");
+        $_meta = $wpdb->get_results ( $_sql, ARRAY_A ) ;
+        logger("\$_meta = " . var_export($_meta, true));
         if (count ( $_meta )) {
             foreach ( $_meta as $row ) {
                 $val = unserialize ( $row [ 'meta_value' ] ) ;
@@ -72,12 +123,24 @@ function CommentHighlight ( $link = 'class' ) {
                 }
             }
         }
-        echo ' ' . implode ( ' ', $ret ) ;
+
+        foreach ($ret AS $key => $val) {
+            if (isset($additional_options['prefix'])) {
+                $ret[$key] = $additional_options['prefix'].$val;
+            }
+            if (isset($additional_options['postfix'])) {
+                $ret[$key] = $val.$additional_options['postfix'];
+            }
+        }
+        echo implode ( ' ', $ret ) ;
     }
+    logger("\$ret = " . var_export($ret, true));
+    logger("}", -1);
 }
 
 function ch_manage_options () {
-    global $wpdb, $VERSION ;
+    global $wpdb, $VERSION, $ch_options ;
+    logger("ch_manage_options () {", +1);
 
     if ($_POST) {
         if ($_POST [ 'submit' ]) {
@@ -92,6 +155,9 @@ function ch_manage_options () {
             }
             $wpdb->query ( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value)
                     VALUES ({$_post_id}, '{$_meta_key}', '" . serialize ( $_arr ) . "');" ) ;
+        } elseif ($_POST['update_values']) {
+            $ch_options['debug_key'] = $_POST['debug_key'];
+            update_option( 'jpo_comment_highlighter_options' , $ch_options );
         }
         echo "<script type='text/javascript'>" ;
         echo "location.href='{$_POST['referer']}'" ;
@@ -105,14 +171,6 @@ function ch_manage_options () {
         echo "location.href='{$_SERVER['SCRIPT_NAME']}?page={$_GET['page']}'" ;
         echo "</script>" ;
         exit () ;
-    }
-
-    if (! function_exists ( 'curl_init' )) {
-        echo "<div class='wrap'>" ;
-        echo "<div style='color: red;'>This plugin only works with <a href='http://php.net/curl' target='_blank'>curl</a> activated in PHP</div>" ;
-        echo "</div>" ;
-        include (ABSPATH . 'wp-admin/admin-footer.php') ;
-        die () ;
     }
 
     echo "<div class='wrap'>" ;
@@ -204,27 +262,46 @@ function ch_manage_options () {
         echo "<br/>" ;
         echo "</form>" ;
     } else {
-        $_meta = $wpdb->get_results ( "SELECT * FROM {$wpdb->postmeta} WHERE LEFT(meta_key, 24) = '_jpo_comment_highlighter';", ARRAY_A ) ;
+        $_sql = "SELECT * FROM {$wpdb->postmeta} WHERE LEFT(meta_key, 24) = '_jpo_comment_highlighter';";
+        logger("\$_sql = {$_sql}");
+        $_meta = $wpdb->get_results ( $_sql , ARRAY_A ) ;
+        logger("\$_meta = " . var_export($_meta, true));
+
+        $debug_key = ($ch_options['debug_key'] ? $ch_options['debug_key'] : substr(md5(uniqid()),0, 8));
+        echo "<form method='post' action='{$PHP_SELF}'>" ;
+
+        echo "<table cellpadding='5' cellspacing='0'>" ;
+        echo "<tr>";
+        echo   "<td colspan='2' valign='top' style='width: 300px'>";
+        echo     "<b>Secret debug key</b> (<a href='http://code.google.com/p/comment-highlighter/wiki/Help' title='Comment Highlighter Help' target='_blank'>?</a>)<br/>";
+        echo     "<i style='color: #aaa;'>Used to enable debug mode by adding <tt>?debug=xxx</tt> or <tt>&amp;debug=xxx</tt> to the URL where <tt>xxx</tt> is the secret debug key</i>";
+        echo   "</td>";
+        echo   "<td colspan='2' valign='top'>";
+        echo     "<input type='text' name='debug_key' value='{$debug_key}' style='width: 250px; font-family: monospace; font-size: 10px;' />";
+        echo     "<input type='submit' style='background-color: #ccffcc;' value=' Update value ' name='update_values' id='update_values' />" ;
+
+        echo   "</td>";
+        echo "</tr>";
         if (count ( $_meta )) {
-            echo "<table cellpadding='3' cellspacing='0'>" ;
             echo "<tr>" ;
-            echo "<th align='left'>Post ID</th>" ;
-            echo "<th align='left'>Criteria(s)</th>" ;
-            echo "<th align='left'>Class to use</th>" ;
-            echo "<td>&nbsp;</td>" ;
+            echo   "<th align='left'>Post ID</th>" ;
+            echo   "<th align='left'>Criteria(s)</th>" ;
+            echo   "<th align='left'>Class(es) to use</th>" ;
+            echo   "<td>&nbsp;</td>" ;
             echo "</tr>" ;
 
-            $tofff = array('email'    => 'email.png',
-                       'pingback' => 'arrow_refresh.png',
-                       'global'   => 'asterisk_yellow.png',
-                       'class'    => 'tag.png',
-                       'name'     => 'vcard.png',
-                       'even'     => 'shape_move_backwards.png',
-                       'odd'      => 'shape_move_forwards.png',
-                       'pid'      => 'tag_red.png',
-                       'cid'      => 'tag_blue.png',
-                       'url'      => 'world.png',
-                       );
+            $tofff = array(
+                'email'    => 'email.png',
+                'pingback' => 'arrow_refresh.png',
+                'global'   => 'asterisk_yellow.png',
+                'class'    => 'tag.png',
+                'name'     => 'vcard.png',
+                'even'     => 'shape_move_backwards.png',
+                'odd'      => 'shape_move_forwards.png',
+                'pid'      => 'tag_red.png',
+                'cid'      => 'tag_blue.png',
+                'url'      => 'world.png',
+            );
 
             foreach ( $_meta as $row ) {
                 $pid = (substr ( $row [ 'meta_key' ], - 6 ) == 'global' ? fff($tofff['global']) .' Global' : fff($tofff['pid']).' '.$row [ 'post_id' ]) ;
@@ -243,41 +320,50 @@ function ch_manage_options () {
                 echo "</tr>" ;
             }
             echo "</table>" ;
+            echo "</form>";
         } else {
+            echo "</table>" ;
             echo "<p>You haven't got any comment highlights yet...</p>" ;
         }
         $_url = get_bloginfo ( 'wpurl' ) . "/wp-admin/options-general.php?page={$_GET['page']}&amp;c=new" ;
         echo "<input type='button' style='background-color: #ccffcc;' value=' Add a new comment highlight ' onclick=\"location.href = '{$_url}';\" />" ;
 
-        update_option( 'jpo_comment_highlighter_options' , array('install_path' => $_GET['page']) );
+      $ch_options['install_path'] = $_GET['page'];
+      update_option( 'jpo_comment_highlighter_options' , $ch_options );
     }
     echo "</div>" ;
+    logger("}", -1);
 }
 
 function comment_highlighter () {
     global $wpdb, $comment_highlighter_cache ;
+    logger("comment_highlighter () {", +1);
 
     if (! isset ( $comment_highlighter_cache )) {
-
         $comment_highlight = $wpdb->get_results ( "SELECT   post_id, meta_value
           FROM {$wpdb->postmeta} AS pm
           INNER JOIN {$wpdb->posts} AS p ON (pm.post_id = p.ID)
           WHERE meta_key = '_jpo_comment_highlighter'
           AND (post_status = 'static' OR post_status = 'publish');" ) ;
     } else {
-        return $comment_highlighter_cache ;
+//        return $comment_highlighter_cache ;
+        $ret = $comment_highlighter_cache;
     }
 
     if (! $comment_highlight) {
-        $comment_highlighter_cache = false ;
-        return false ;
+//        $comment_highlighter_cache = false ;
+//        return false ;
+        $ret = false;
+    } else {
+        foreach ( $comment_highlight as $link ) {
+            $comment_highlighter_cache [ $link->post_id ] = $link->meta_value ;
+        }
+        $ret = $comment_highlighter_cache;
     }
 
-    foreach ( $comment_highlight as $link ) {
-        $comment_highlighter_cache [ $link->post_id ] = $link->meta_value ;
-    }
-
-    return $comment_highlighter_cache ;
+    logger("\$comment_highlighter_cache = " . var_export($comment_highlighter_cache, true));
+    logger("}", -1);
+    return $ret;
 }
 
 if (! function_exists('fff')) {
@@ -286,4 +372,5 @@ if (! function_exists('fff')) {
     return "<img src='http://famfamfam.googlecode.com/svn/wiki/images/{$name}.png' alt='{$name}' style='width: 16px; vertical-align: middle;' />";
   }
 }
+logger("plugin end", -1);
 ?>
