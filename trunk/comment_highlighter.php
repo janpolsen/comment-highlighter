@@ -3,12 +3,38 @@
 Plugin Name: Comment Highlighter
 Plugin URI: http://code.google.com/p/comment-highlighter/
 Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks. If upgrading from v0.7 or earlier, then you MUST visit the settings page to be sure everything is installed correct.
-Version: 0.10
+Version: 0.11
 Author: Jan Olsen
 Author URI: http://kamajole.dk
 */
 add_action ( 'admin_menu', 'ch_menu' ) ;
 $ch_options = get_option( 'jpo_comment_highlighter_options' );
+if ( ! function_exists( 'file_put_contents' ) ) {
+    define( 'FILE_APPEND' , 1 );
+
+    /**
+     * Support for PHP4
+     * Write a string to a file
+     *
+     * @param unknown_type $n Full file name to write to
+     * @param unknown_type $d String to write
+     * @param unknown_type $flag Use FILE_APPEND for appending
+     * @return unknown
+     */
+    function file_put_contents( $n, $d, $flag = false ) {
+        $mode = ( $flag == FILE_APPEND || strtoupper( $flag ) == 'FILE_APPEND' ) ? 'a' : 'w';
+        $f = @fopen( $n , $mode );
+        if ( $f === false ) {
+            return 0;
+        } else {
+            if ( is_array( $d ) )
+                $d = implode( $d );
+            $bytes_written = fwrite( $f , $d );
+            fclose( $f );
+            return $bytes_written;
+        }
+    }
+}
 if ( $_GET [ 'debug' ] == $ch_options [ 'debug_key' ] ) {
     $logfile = dirname(__FILE__).'/'.basename(__FILE__, '.php').'.log';
     $loglevel = 0;

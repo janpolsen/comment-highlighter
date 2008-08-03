@@ -27,3 +27,7 @@ http://famfamfam.googlecode.com/svn/wiki/images/bug.png Fixed the link from a co
 http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added the debug key to the option page. The debug feature will only be activated if that debug key is added to the URL like `?debug=xxx` og `&debug=xxx`, where `xxx` is the debug key 
 
 http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added a feature so you can add a prefix and/or postfix to the class(es) that gets added
+
+=== 2008-08-03 - v0.11 ===
+http://famfamfam.googlecode.com/svn/wiki/images/bug.png Added PHP4 support for file_put_contents()
+
