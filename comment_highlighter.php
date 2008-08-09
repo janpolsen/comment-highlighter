@@ -3,7 +3,7 @@
 Plugin Name: Comment Highlighter
 Plugin URI: http://code.google.com/p/comment-highlighter/
 Description: Add a style class to specific comments (or all comments) based on the authors email, url or name or based on post ID, comment ID or pingbacks. If upgrading from v0.7 or earlier, then you MUST visit the settings page to be sure everything is installed correct.
-Version: 0.11
+Version: 0.13
 Author: Jan Olsen
 Author URI: http://kamajole.dk
 */
@@ -128,6 +128,11 @@ function CommentHighlight ( $link = 'class', $additional_options = array() ) {
                                 $ret [] = $val [ 'class' ] ;
                             }
                         break ;
+                        case 'uid' :
+                            if ($comment->comment_author_name == $critval) {
+                                $ret [] = $val [ 'class' ] ;
+                            }
+                        break ;
                         case 'cid' :
                             if ($comment->comment_ID == $critval) {
                                 $ret [] = $val [ 'class' ] ;
@@ -171,6 +176,7 @@ function ch_manage_options () {
     if ($_POST) {
         if ($_POST [ 'submit' ]) {
             $_meta_key = '_jpo_comment_highlighter' . ($_POST [ 'global' ] ? '_global' : '') ;
+            $_meta_id  = $_POST['meta_id'];
             $_post_id = ($_POST [ 'txt_pid' ] ? $_POST [ 'txt_pid' ] : 0) ;
             $_arr = array ( ) ;
             foreach ( $_POST as $key => $val ) {
@@ -179,8 +185,12 @@ function ch_manage_options () {
                     $_arr [ $_post ] = addslashes ( $_POST [ "txt_{$_post}" ] ) ;
                 }
             }
-            $wpdb->query ( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value)
-                    VALUES ({$_post_id}, '{$_meta_key}', '" . serialize ( $_arr ) . "');" ) ;
+            if ($_meta_id) {
+                $wpdb->query ( "UPDATE {$wpdb->postmeta} SET post_id = {$_post_id}, meta_key = '{$_meta_key}', meta_value = '" . serialize ( $_arr ) . "' WHERE meta_key LIKE '_jpo_comment_highlighter%' AND meta_id = {$_meta_id};" ) ;
+            } else {
+                $wpdb->query ( "INSERT {$wpdb->postmeta} SET post_id = {$_post_id}, meta_key = '{$_meta_key}', meta_value = '" . serialize ( $_arr ) . "' ;" );
+//                $wpdb->query ( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES ({$_post_id}, '{$_meta_key}', '" . serialize ( $_arr ) . "');" ) ;
+            }
         } elseif ($_POST['update_values']) {
             $ch_options['debug_key'] = $_POST['debug_key'];
             update_option( 'jpo_comment_highlighter_options' , $ch_options );
@@ -188,7 +198,7 @@ function ch_manage_options () {
         echo "<script type='text/javascript'>" ;
         echo "location.href='{$_POST['referer']}'" ;
         echo "</script>" ;
-        exit () ;
+        exit;
     }
 
     if ($_GET [ 'delete' ]) {
@@ -196,87 +206,121 @@ function ch_manage_options () {
         echo "<script type='text/javascript'>" ;
         echo "location.href='{$_SERVER['SCRIPT_NAME']}?page={$_GET['page']}'" ;
         echo "</script>" ;
-        exit () ;
+        exit;
     }
+
+    $tofff = array(
+        'email'    => 'email.png',
+        'pingback' => 'arrow_refresh.png',
+        'global'   => 'asterisk_yellow.png',
+        'class'    => 'tag.png',
+        'name'     => 'vcard.png',
+        'even'     => 'shape_move_backwards.png',
+        'odd'      => 'shape_move_forwards.png',
+        'pid'      => 'tag_red.png',
+        'cid'      => 'tag_blue.png',
+        'uid'      => 'tag_green.png',
+        'url'      => 'world.png',
+        'delete'   => 'delete.png',
+        'edit'     => 'pencil.png',
+    );
 
     echo "<div class='wrap'>" ;
 
     echo "<h2>Comment Highlighter Options</h2>" ;
 
-    if (isset ( $_GET [ 'c' ] )) {
+    echo "<form method='post' action='{$PHP_SELF}'>" ;
+    if (isset($_GET['c']) || isset($_GET['edit'])) {
         if ($_GET [ 'c' ] == 'new') {
-            $_pid = '0' ;
-            $_cid = '0' ;
-            $_email = '' ;
-            $_name = '' ;
-            $_url = '' ;
+            $_pid   =
+            $_cid   = '0' ;
+            $_uid   =
+            $_email =
+            $_name  =
+            $_url   = '' ;
+        } elseif ($_GET['edit']) {
+            $_sql = "SELECT * FROM {$wpdb->postmeta} WHERE LEFT(meta_key, 24) = '_jpo_comment_highlighter' AND meta_id = {$_GET['edit']};";
+            logger("\$_sql = {$_sql}");
+            $_meta = $wpdb->get_results ( $_sql , ARRAY_A ) ;
+            $_global = (substr($_meta[0]['meta_key'], -6) == 'global' ? true : false);
+            foreach(unserialize($_meta[0]['meta_value']) AS $var => $val) {
+                $_tmp = "_{$var}";
+                $$_tmp = $val;
+            }
+            echo "<input type='hidden' name='meta_id' value='{$_GET['edit']}' />";
         } else {
-            $_meta = $wpdb->get_row ( "SELECT * FROM {$wpdb->comments} WHERE comment_ID = {$_GET['c']};" ) ;
-            $_pid = $_meta->comment_post_ID ;
-            $_cid = $_GET [ 'c' ] ;
+            $_meta  = $wpdb->get_row ( "SELECT * FROM {$wpdb->comments} WHERE comment_ID = {$_GET['c']};" ) ;
+            $_pid   = $_meta->comment_post_ID ;
+            $_cid   = $_GET [ 'c' ] ;
             $_email = $_meta->comment_author_email ;
-            $_name = $_meta->comment_author ;
-            $_url = $_meta->comment_author_url ;
+            $_email = $_meta->comment_author_name ;
+            $_name  = $_meta->comment_author ;
+            $_url   = $_meta->comment_author_url ;
         }
-        echo "<form method='post' action='{$PHP_SELF}'>" ;
         echo "<input type='hidden' name='referer' value='{$_SERVER['HTTP_REFERER']}' />" ;
         echo "<table border='0' cellpadding='5' cellspacing='0'>" ;
         echo "<caption>Create a new comment highlight based on <i>(only selected criterias will be saved and you can select multiple criterias)</i>:</caption>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_pid' name='ch_pid' value='true' /></td>" ;
-        echo "<td style='whitespace: nowrap;'><label for='ch_pid'>".fff('tag_red')." Post ID:</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_pid' name='ch_pid' value='true' ".toChecked($_pid)."/></td>" ;
+        echo "<td style='whitespace: nowrap;'><label for='ch_pid'>".fff($tofff['pid'])." Post ID:</label></td>" ;
         echo "<td><input type='text' name='txt_pid'   style='width: 250px;' value='{$_pid}' /></td>" ;
         echo "<td>&nbsp;</td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_cid' name='ch_cid' value='true' /></td>" ;
-        echo "<td style='whitespace: nowrap;'><label for='ch_cid'>".fff('tag_blue')." Comment ID:</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_cid' name='ch_cid' value='true' ".toChecked($_cid)."/></td>" ;
+        echo "<td style='whitespace: nowrap;'><label for='ch_cid'>".fff($tofff['cid'])." Comment ID:</label></td>" ;
         echo "<td><input type='text' name='txt_cid'   style='width: 250px;' value='{$_cid}' /></td>" ;
         echo "<td>&nbsp;</td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_email' name='ch_email' value='1' /></td>" ;
-        echo "<td><label for='ch_email'>".fff('email')." Email:</label></td>" ;
+        echo   "<td align='center'><input type='checkbox' id='ch_uid' name='ch_uid' value='true' ".toChecked($_uid)."/></td>" ;
+        echo   "<td style='whitespace: nowrap;'><label for='ch_uid'>".fff($tofff['uid'])." User ID:</label></td>" ;
+        echo   "<td><input type='text' name='txt_uid'   style='width: 250px;' value='{$_uid}' /></td>" ;
+        echo   "<td>the user ID of a person (usually the WP login name)</td>" ;
+        echo "</tr>" ;
+        echo "<tr>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_email' name='ch_email' value='1' ".toChecked($_email)."/></td>" ;
+        echo "<td><label for='ch_email'>".fff($tofff['email'])." Email:</label></td>" ;
         echo "<td><input type='text' name='txt_email' style='width: 250px;' value='{$_email}' /></td>" ;
         echo "<td><i>the email of the person</i></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_name' name='ch_name' value='true' /></td>" ;
-        echo "<td><label for='ch_name'>".fff('vcard')." Name:</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_name' name='ch_name' value='true' ".toChecked($_name)."/></td>" ;
+        echo "<td><label for='ch_name'>".fff($tofff['name'])." Name:</label></td>" ;
         echo "<td><input type='text' name='txt_name'  style='width: 250px;' value='{$_name}' /></td>" ;
         echo "<td><i>the name of the person</i></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_url' name='ch_url' value='true' /></td>" ;
-        echo "<td><label for='ch_url'>".fff('world')." URL:</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_url' name='ch_url' value='true' ".toChecked($_url)."/></td>" ;
+        echo "<td><label for='ch_url'>".fff($tofff['url'])." URL:</label></td>" ;
         echo "<td><input type='text' name='txt_url'   style='width: 250px;' value='{$_url}' /></td>" ;
         echo "<td><i>the URL the person has entered</i></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_pingback' name='ch_pingback' value='true' /></td>" ;
-        echo "<td colspan='2'><label for='ch_pingback'>".fff('arrow_refresh')." Pingback</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_pingback' name='ch_pingback' value='true' ".toChecked($_pingback)."/></td>" ;
+        echo "<td colspan='2'><label for='ch_pingback'>".fff($tofff['pingback'])." Pingback</label></td>" ;
         echo "<td><i>if a comment isn't really a comment but a pingback/trackback</i><input type='hidden' value='true' name='txt_pingback' id='txt_pingback' /></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_even' name='ch_even' value='true' /></td>" ;
-        echo "<td colspan='2'><label for='ch_even'>".fff('shape_move_backwards')." Even numbered comments</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_even' name='ch_even' value='true' ".toChecked($_even)."/></td>" ;
+        echo "<td colspan='2'><label for='ch_even'>".fff($tofff['even'])." Even numbered comments</label></td>" ;
         echo "<td><i>every even numbered comment</i><input type='hidden' value='true' name='txt_even' id='txt_even' /></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
-        echo "<td align='center'><input type='checkbox' id='ch_odd' name='ch_odd' value='true' /></td>" ;
-        echo "<td colspan='2'><label for='ch_odd'>".fff('shape_move_forwards')." Odd numbered comments</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='ch_odd' name='ch_odd' value='true' ".toChecked($_odd)."/></td>" ;
+        echo "<td colspan='2'><label for='ch_odd'>".fff($tofff['odd'])." Odd numbered comments</label></td>" ;
         echo "<td><i>every odd numbered comment</i><input type='hidden' value='true' name='txt_odd' id='txt_odd' /></td>" ;
         echo "</tr>" ;
         echo "<tr style='font-weight: bold;'>" ;
-        echo "<td align='center'><input type='checkbox' id='global' name='global' value='true' " . ($_GET [ 'c' ] == 'new' ? "checked='checked'" : '') . " /></td>" ;
-        echo "<td><label for='global'>".fff('asterisk_yellow')." Global</label></td>" ;
+        echo "<td align='center'><input type='checkbox' id='global' name='global' value='true' " . ($_GET [ 'c' ] == 'new' || $_global ? "checked='checked'" : '') . " /></td>" ;
+        echo "<td><label for='global'>".fff($tofff['global'])." Global</label></td>";
         echo "<td>&nbsp;</td>" ;
         echo "<td><i>this means that the post and comment ID will not be part of the criteria</i></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
         echo "<td><input type='hidden' name='ch_class' value='true' /></td>" ;
-        echo "<td>".fff('tag')." Class(es):</td>" ;
-        echo "<td><input type='text' name='txt_class' style='width: 250px;' /></td>" ;
+        echo "<td>".fff($tofff['class'])." Class(es):</td>" ;
+        echo "<td><input type='text' name='txt_class' style='width: 250px;' value='{$_class}'/></td>" ;
         echo "<td><i>separate multiple classes with spaces</i></td>" ;
         echo "</tr>" ;
         echo "<tr>" ;
@@ -316,19 +360,6 @@ function ch_manage_options () {
             echo   "<td>&nbsp;</td>" ;
             echo "</tr>" ;
 
-            $tofff = array(
-                'email'    => 'email.png',
-                'pingback' => 'arrow_refresh.png',
-                'global'   => 'asterisk_yellow.png',
-                'class'    => 'tag.png',
-                'name'     => 'vcard.png',
-                'even'     => 'shape_move_backwards.png',
-                'odd'      => 'shape_move_forwards.png',
-                'pid'      => 'tag_red.png',
-                'cid'      => 'tag_blue.png',
-                'url'      => 'world.png',
-            );
-
             foreach ( $_meta as $row ) {
                 $pid = (substr ( $row [ 'meta_key' ], - 6 ) == 'global' ? fff($tofff['global']) .' Global' : fff($tofff['pid']).' '.$row [ 'post_id' ]) ;
                 $val = unserialize ( $row [ 'meta_value' ] ) ;
@@ -342,7 +373,11 @@ function ch_manage_options () {
                 }
                 echo "</td>" ;
                 echo "<td valign='top'>".fff($tofff['class'])."{$val['class']}</td>" ;
-                echo "<td valign='top'><a href='{$_SERVER['REQUEST_URI']}&amp;delete={$row['meta_id']}' title='Delete this comment highlight'>Delete</a></td>" ;
+                echo "<td valign='top'>";
+                echo   fff($tofff['delete'])." <a href='{$_SERVER['REQUEST_URI']}&amp;delete={$row['meta_id']}' title='Delete this comment highlight'>Delete</a>";
+                echo   str_repeat('&nbsp;', 5);
+                echo   fff($tofff['edit'])." <a href='{$_SERVER['REQUEST_URI']}&amp;edit={$row['meta_id']}' title='Edit this comment highlight'>Edit</a>" ;
+                echo "</td>" ;
                 echo "</tr>" ;
             }
             echo "</table>" ;
@@ -397,6 +432,10 @@ if (! function_exists('fff')) {
     $name = basename($name,'.png');
     return "<img src='http://famfamfam.googlecode.com/svn/wiki/images/{$name}.png' alt='{$name}' style='width: 16px; vertical-align: middle;' />";
   }
+}
+
+function toChecked($in) {
+    return ($in ? "checked='checked'" : '');
 }
 logger("plugin end", -1);
 ?>
