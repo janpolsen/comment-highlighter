@@ -31,3 +31,8 @@ http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added a feature so yo
 === 2008-08-03 - v0.11 ===
 http://famfamfam.googlecode.com/svn/wiki/images/bug.png Added PHP4 support for file_put_contents()
 
+=== 2008-08-09 - v0.13 ===
+http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added User ID to the list of criterias which can be used to create rules from
+
+http://famfamfam.googlecode.com/svn/wiki/images/plugin.png Added a link so it's possible to edit already created rules
+
